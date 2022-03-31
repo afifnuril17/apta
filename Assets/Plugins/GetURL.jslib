@@ -1,30 +1,33 @@
 ﻿mergeInto(LibraryManager.library, {
-  GetURLFromPage: function () {
+   
+   GetURLFromPage: function () {
         var returnStr = window.top.location.href;
         var bufferSize = lengthBytesUTF8(returnStr) + 1
         var buffer = _malloc(bufferSize);
         stringToUTF8(returnStr, buffer, bufferSize);
         return buffer;
-    },
+   },
  
-    GetQueryParam: function(paramId) {
+   GetQueryParam: function(paramId) {
         var urlParams = new URLSearchParams(location.search);
         var param = urlParams.get(Pointer_stringify(paramId));
-        console.log("JavaScript read param: " + param);
         var bufferSize = lengthBytesUTF8(param) + 1;
         var buffer = _malloc(bufferSize);
         stringToUTF8(param, buffer, bufferSize);
         return buffer;
-    },
+   },
 
    FinishGame: function (str) {
-        window.location.href="https://devgamification.psikologicare.com" +  Pointer_stringify(str);
-	localStorage.removeItem("from");
-	console.log(Pointer_stringify(str));
+        window.location.href=Pointer_stringify(str);
+	     localStorage.removeItem("from");
+        localStorage.removeItem("rendered");
    },
    
-   OnGameStarted: function ()
-     {
-           window.gameIsRunning = true ;
-     },
+   OnGameStarted: function () {
+        window.gameIsRunning = true;
+   },
+
+   AddRendered: function (str){
+        localStorage.setItem("rendered", true);
+   },
 });

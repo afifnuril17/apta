@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
 {
 	[DllImport("__Internal")]
 	private static extern void FinishGame(string str);
+	[DllImport("__Internal")]
+	private static extern void AddRendered(bool str);
 	// Start is called before the first frame update
 	public static GameManager instanceHandler;
 	public GameObject introPanel;
@@ -28,11 +30,16 @@ public class GameManager : MonoBehaviour
 	public TextMeshProUGUI timerText;
 	string pathsplit;
 	bool autoNext = true;
+	string root_env = "";
 	private void Awake()
 	{
 		Application.runInBackground = true;
 		instanceHandler = this;
 		DontDestroyOnLoad(this.gameObject);
+	}
+	void Start()
+	{
+		AddRendered(true);
 	}
 	void Update()
 	{
@@ -45,48 +52,48 @@ public class GameManager : MonoBehaviour
 
 			if ((int)myInt == 0)
 			{
+				gameObject.GetComponent<SoalManager>().is20second = true;
+				gameObject.GetComponent<SoalManager>().time = 20f;
 				Next();
 				lanjut = false;
 			}
-			// if (mainPanel.GetComponent<ScoreManager>().score >= 240)
-			// {
-			// 	lanjut = false;
-			// 	Next();
-			// }
+			if (GetComponent<SoalManager>().score >= 240)
+			{
+				lanjut = false;
+				Next();
+			}
 		}
 	}
 	void DisplayTime(float timeDisplay)
 	{
 		minutes = Mathf.FloorToInt(timeDisplay / 60);
 		seconds = Mathf.FloorToInt(timeDisplay % 60);
-
 		timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
 	}
 	public void Next()
 	{
-		// if (mainPanel.GetComponent<ScoreManager>().score >= 240)
-		// {
-		// 	StartCoroutine(SendScore());
-		// 	selesaiPanel.SetActive(true);
-		// 	mainPanel.SetActive(false);
-		// 	restartPanel.SetActive(false);
-		// }
-		// else
-		// {
-		// 	selesaiPanel.SetActive(false);
-		// 	mainPanel.SetActive(false);
-		// 	restartPanel.SetActive(true);
-		// }
+		if (GetComponent<SoalManager>().score >= 240)
+		{
+			StartCoroutine(SendScore());
+			selesaiPanel.SetActive(true);
+			mainPanel.SetActive(false);
+			restartPanel.SetActive(false);
+		}
+		else
+		{
+			selesaiPanel.SetActive(false);
+			mainPanel.SetActive(false);
+			restartPanel.SetActive(true);
+		}
 	}
 	public void StartGame(string user_id)
 	{
 		introPanel.SetActive(false);
 		mainPanel.SetActive(true);
-
 		value = user_id.Split(',');
 		getId_user = int.Parse(value[0]);
 		pathsplit = value[1];
-
+		root_env = value[2];
 		lanjut = true;
 	}
 	IEnumerator SendScore()
@@ -95,10 +102,8 @@ public class GameManager : MonoBehaviour
 		form.AddField("user_id", getId_user);
 		form.AddField("point", "240");
 		form.AddField("game_id", 3);
-
-		UnityWebRequest www = UnityWebRequest.Post("http://103.122.97.237:1001/mini-game-add-score", form);
+		UnityWebRequest www = UnityWebRequest.Post(root_env + "/mini-game-add-score", form);
 		yield return www.SendWebRequest();
-
 		if (www.isNetworkError || www.isHttpError)
 		{
 			Debug.Log("error5 " + www.error);
@@ -114,7 +119,6 @@ public class GameManager : MonoBehaviour
 		while (selesaiInt >= 0)
 		{
 			selesaiFloat += Time.deltaTime;
-
 			if (selesaiFloat > 1f)
 			{
 				selesaiFloat = 0f;
@@ -132,7 +136,7 @@ public class GameManager : MonoBehaviour
 	}
 	public void CobaLagi()
 	{
-		// mainPanel.GetComponent<ScoreManager>().Reset();
+		GetComponent<SoalManager>().Reset();
 		myInt = max;
 		lanjut = true;
 		selesaiPanel.SetActive(false);
